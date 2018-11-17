@@ -14,8 +14,11 @@ type Block struct{
 	Hash			[]byte
 }
 
-fun (b *Block) SetHash() {
-	Timestamp := []byte(strconv.FormatInt(b.Timestamp,10))
-	headers := bytes.Join([][]byte{b.PrevBlockHash, b.Data, timestamp})
+fun (block *Block) SetHash() {
+	Timestamp := []byte(strconv.FormatInt(block.Timestamp,10))
+	headers := bytes.Join([][]byte{block.PrevBlockHash, block.Data, timestamp})
+
+	hash := sha256.Sum256(headers)
+	block.Hash = hash[:]
 }
 
