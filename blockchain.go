@@ -1,13 +1,11 @@
+package main
+
 type Blockchain struct {
 	blocks []*Block
 }
 
-func (blockchain *Blockchain) AddBlock(data string) {
-	prevBlock := blockchain.blocks[len(blockchain.blocks)-1]
-	newBlock := newBlock(data, prevBlock.Hash)
-	blockchain.blocks = append(blockchain.blocks, newBlock)
-}
-
-func NewGenesisBlock() *Block{
-	return newBlock("GENESIS Block",[]byte{})
+func (bc *Blockchain) AddBlock(data string) {
+	prevBlock := bc.blocks[len(bc.blocks)-1]
+	newBlock := NewBlock(data, prevBlock.Hash)
+	bc.blocks = append(bc.blocks, newBlock)
 }

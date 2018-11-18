@@ -8,19 +8,19 @@ import (
 )
 
 //block valuable information.
-type Block struct{
-	Timestamp		int64
-	Data			[]byte
-	PrevBlockHash	[]byte
-	Hash			[]byte
+type Block struct {
+	Timestamp     int64
+	Data          []byte
+	PrevBlockHash []byte
+	Hash          []byte
 }
 
-func (block *Block) SetHash() {
-	Timestamp := []byte(strconv.FormatInt(block.Timestamp,10))
-	headers := bytes.Join([][]byte{block.PrevBlockHash, block.Data, timestamp})
+func (b *Block) SetHash() {
+	timestamp := []byte(strconv.FormatInt(b.Timestamp, 10))
+	headers := bytes.Join([][]byte{b.PrevBlockHash, b.Data, timestamp},[]byte{})
 
 	hash := sha256.Sum256(headers)
-	block.Hash = hash[:]
+	b.Hash = hash[:]
 }
 
 func NewBlock(data string, prevBlockHash []byte) *Block {
@@ -29,3 +29,6 @@ func NewBlock(data string, prevBlockHash []byte) *Block {
 	return block
 }
 
+func NewGenesisBlock() *Block{
+	return NewBlock("GENESIS Block",[]byte{})
+}
