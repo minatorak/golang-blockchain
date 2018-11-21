@@ -2,6 +2,9 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
+	"fmt"
+	"math"
 	"math/big"
 )
 
@@ -12,15 +15,19 @@ type ProofOfWork struct {
 	target *big.Int
 }
 
+var (
+	maxNonce = math.MaxInt64
+)
+
 func NewProofOfWork(b *Block) *ProofOfWork {
 	target := big.NewInt(1)
-	target.Lsh(target, uint(256-targetBits))
+	target.Lsh(target, uint(256-targetBits)) // sets z = x << n and returns z.
 
 	pow := &ProofOfWork{b, target}
 	return pow
 }
 
-func (pow *ProofOfWork) prepareData(nonce int) []byte  {
+func (pow *ProofOfWork) prepareData(nonce int) []byte {
 	data := bytes.Join(
 		[][]byte{
 			pow.block.PrevBlockHash,
@@ -33,4 +40,29 @@ func (pow *ProofOfWork) prepareData(nonce int) []byte  {
 	)
 
 	return data
+}
+
+func (pow *ProofOfWork) Run() (int, []byte) {
+	var hashInt big.Int
+	var hash [32]byte
+	nonce := 0
+
+	fmt.Printf("Mining block containing \"%s\"\n \"%s", pow.block.Data, pow.block.Hash)
+
+	for nonce < maxNonce {
+		data := pow.prepareData(nonce)
+		hash = sha256.Sum256(data)
+		fmt.Printf("\r %x", hash)
+		hashInt.SetBytes(hash[:])
+
+		if hashInt.Cmp(pow.target) == -1 {
+			break
+		} else {
+			nonce++
+		}
+	}
+
+	fmt.Print("\n\n")
+
+	return nonce, hash[:]
 }
