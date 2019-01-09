@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"github.com/boltdb/bolt"
+	"log"
 )
 
 const dbFile = "blockchain.db"
@@ -12,6 +12,11 @@ const blocksBucket = "blocks"
 type Blockchain struct {
 	tip []byte
 	db  *bolt.DB
+}
+
+type BlockchainIterator struct {
+	currentHash []byte
+	db          *bolt.DB
 }
 
 func (bc *Blockchain) AddBlock(data string) {
@@ -47,6 +52,7 @@ func (bc *Blockchain) AddBlock(data string) {
 		return nil
 	})
 }
+
 //1 Open a DB file.
 //2 Check if there’s a blockchain stored in it.
 //3 If there’s a blockchain:
@@ -57,7 +63,7 @@ func (bc *Blockchain) AddBlock(data string) {
 //		4.2 Store in the DB.
 //		4.3 Save the genesis block’s hash as the last block hash.
 //		4.4 Create a new Blockchain instance with its tip pointing at the genesis block.
-func NewBlockchain() *Blockchain  {
+func NewBlockchain() *Blockchain {
 	var tip []byte
 	db, err := bolt.Open(dbFile, 0600, nil)
 	if err != nil {
@@ -102,3 +108,28 @@ func NewBlockchain() *Blockchain  {
 	return &bc
 }
 
+func (bc *Blockchain) Iterator() *BlockchainIterator {
+	return &BlockchainIterator{bc.tip, bc.db}
+	//return BlockchainIterator
+}
+
+//BlockchainIterator will do only one thing: it’ll return the next block from db a blockchain.
+func (i *BlockchainIterator) Next() *Block {
+	var block *Block
+
+	err := i.db.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blocksBucket))
+		encodedBlock := b.Get(i.currentHash)
+		block = DeserializeBlock(encodedBlock)
+
+		return nil
+	})
+
+	if err != nil {
+		log.Panic(err)
+	}
+
+	i.currentHash = block.PrevBlockHash
+
+	return block
+}
