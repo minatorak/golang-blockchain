@@ -33,7 +33,7 @@ func (bc *Blockchain) AddBlock(data string) {
 		log.Panic(err)
 	}
 
-	newBlock := NewBlock(data, lastHash)
+	newBlock := NewBlock(data, lastHash) // undefined: NewBlock
 
 	err = bc.db.Update(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
@@ -75,7 +75,7 @@ func NewBlockchain() *Blockchain {
 
 		if b == nil {
 			fmt.Println("No existing blockchain found. Creating a new one...")
-			genesis := NewGenesisBlock()
+			genesis := NewGenesisBlock() //  undefined: NewGenesisBlock
 
 			b, err := tx.CreateBucket([]byte(blocksBucket))
 			if err != nil {
@@ -114,13 +114,13 @@ func (bc *Blockchain) Iterator() *BlockchainIterator {
 }
 
 //BlockchainIterator will do only one thing: it’ll return the next block from db a blockchain.
-func (i *BlockchainIterator) Next() *Block {
-	var block *Block
+func (i *BlockchainIterator) Next() *Block { // undefined: Block
+	var block *Block // undefined: Block
 
 	err := i.db.View(func(tx *bolt.Tx) error {
 		b := tx.Bucket([]byte(blocksBucket))
 		encodedBlock := b.Get(i.currentHash)
-		block = DeserializeBlock(encodedBlock)
+		block = DeserializeBlock(encodedBlock) //  undefined: DeserializeBlock
 
 		return nil
 	})
